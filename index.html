@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find nearby medical facilities - hospitals, clinics, pharmacies, and dentists worldwide">
+    <title>HealthHub Bridge - Global Medical Facility Access</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px 0;
+}
+
+.header h1 {
+    color: #16a34a;
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.header-subtitle {
+    color: #64748b;
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Search Card */
+.search-card {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Filters */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.filter-group {
+    position: relative;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.filter-group select, .filter-group input[type="number"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-group select:hover, .filter-group input:hover {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.filter-group select:focus, .filter-group input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+}
+
+
+.distance-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.distance-input:hover {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.distance-input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+}
+
+/* Search Box */
+.search-box {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    align-items: stretch;
+}
+
+.search-input-container {
+    flex: 1;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 16px 20px 16px 50px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.2rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+}
+
+.search-input:focus + .search-input-icon {
+    color: #16a34a;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4);
+}
+
+.btn-secondary {
+    background: #f8fafc;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+
+.btn:disabled {
+    background: #e2e8f0;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* Alerts */
+.alert {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    color: #166534;
+}
+
+.alert-info {
+    background: #fefce8;
+    border: 2px solid #fde047;
+    color: #a16207;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    border: 2px solid #fde047;
+    color: #92400e;
+    }
+
+.alert-error {
+    background: #fee2e2;
+    border: 2px solid #fca5a5;
+    color: #991b1b;
+}
+
+/* Cache indicator */
+.cache-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fefce8;
+    color: #a16207;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+}
+
+/* Results Header */
+.results-header {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Search within results */
+.search-results-box {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.search-results-input {
+    flex: 1;
+    padding: 12px 16px 12px 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+/* Facilities Grid */
+.facilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+/* Facility Cards */
+.facility-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.facility-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #9ca3af;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.1);
+    color: #e11d48;
+}
+
+.favorite-btn.favorited {
+    color: #e11d48;
+}
+
+.favorite-btn.favorited:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
+.favorite-btn.favorited {
+    color: #e11d48;
+}
+
+.favorite-btn.favorited:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
+.facility-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 18px;
+    padding-right: 40px;
+    line-height: 1.4;
+}
+
+.facility-type-badge {
+    display: inline-block;
+    background: #16a34a;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.detail-row {
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    color: #374151;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.detail-row i {
+    color: #16a34a;
+    width: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.detail-row strong {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.detail-row a {
+    color: #16a34a;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.detail-row a:hover {
+    text-decoration: underline;
+}
+
+.district-info {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Card Actions */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-book {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+    color: white;
+}
+
+.btn-book:hover {
+    background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(234, 179, 8, 0.4);
+}
+
+.btn-map {
+    background: #f8fafc;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-map:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+
+/* Recent Searches */
+.recent-searches {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.recent-searches h4 {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.clear-history-btn {
+    background: none;
+    border: 1px solid #d1d5db;
+    color: #64748b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-history-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.search-history-items {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.history-item {
+    padding: 8px 14px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.history-item:hover {
+    background: #16a34a;
+    color: white;
+    border-color: #16a34a;
+}
+
+/* Loading State */
+.loader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 20px;
+    gap: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #16a34a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { 
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+/* Empty State */
+.empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.empty-state h3 {
+    font-size: 1.6rem;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.instructions-box {
+    background: #f8fafc;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 650px;
+    margin: 0 auto;
+    text-align: left;
+    line-height: 1.8;
+    border: 1px solid #e2e8f0;
+}
+
+.instructions-box strong {
+    color: #1e293b;
+}
+
+.instruction-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.step-number {
+    background: #16a34a;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 40px;
+}
+
+.pagination button {
+    padding: 12px 20px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #16a34a;
+    color: white;
+    border-color: #16a34a;
+    transform: translateY(-1px);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination .page-info {
+    color: #64748b;
+    font-size: 0.95rem;
+    padding: 0 15px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.modal-large {
+    max-width: 900px;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    background: #f3f4f6;
+    color: #333;
+}
+
+.modal h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 50px;
+    border-top: 1px solid #e2e8f0;
+}
+
+footer p {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+footer a {
+    color: #16a34a;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Street View Styles */
+.street-view-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.street-view-container h4 {
+    margin: 0 0 15px 0;
+    color: #16a34a;
+    font-size: 1.1em;
+}
+
+.street-view-image {
+    text-align: center;
+}
+
+.street-view-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.street-view-caption {
+    margin: 10px 0 0 0;
+    font-size: 0.9em;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.street-view-loading {
+    padding: 40px;
+    color: #6b7280;
+    font-size: 1em;
+}
+
+.street-view-error {
+    padding: 30px;
+    text-align: center;
+    color: #9ca3af;
+}
+
+.street-view-error i {
+    font-size: 2em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2.2rem;
+    }
+
+    .header-subtitle {
+        font-size: 1rem;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-card {
+        padding: 25px;
+    }
+
+    .facilities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-state {
+        padding: 40px 25px;
+    }
+
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .card-actions {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 1.9rem;
+    }
+
+    .facility-card {
+        padding: 20px;
+    }
+
+    .search-card {
+        padding: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <h1>HealthHub Bridge</h1>
+            <p class="header-subtitle">Find nearby medical facilities based on your location and preferences with comprehensive information and real time data</p>
+        </header>
+
+        <!-- Search and Filter Card -->
+        <section class="search-card">
+            <!-- Filter Options -->
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="facilityType">
+                        Facility Type
+                    </label>
+                    <select id="facilityType" aria-label="Select facility type">
+                        <option value="hospital">Hospitals</option>
+                        <option value="clinic">Clinics</option>
+                        <option value="pharmacy">Pharmacies</option>
+                        <option value="dentist">Dentists</option>
+                        <option value="optical">Optical Centers</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy">
+                        Sort By
+                    </label>
+                    <select id="sortBy" aria-label="Sort results by">
+                        <option value="distance">Distance (Nearest First)</option>
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
+                        <option value="rating">Rating</option>
+                    </select>
+                </div>
+
+                 <div class="filter-group">
+                    <label for="maxDistance">Max Distance (km)</label>
+                    <input type="number" id="maxDistance" min="1" max="100" value="25" class="distance-input" aria-label="Maximum distance in kilometers">
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-box">
+                <div class="search-input-container">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Enter location (e.g., Kigali, Nairobi, Kampala, Dar es Salaam)..."
+                        aria-label="Enter search location"
+                    >
+                    <i class="fas fa-search search-input-icon"></i>
+                </div>
+                <button class="btn btn-secondary" id="useLocationBtn" title="Use my current location">
+                    <i class="fas fa-location-arrow"></i>
+                </button>
+                <button class="btn btn-primary" id="searchBtn" aria-label="Search for facilities">
+                    <i class="fas fa-search"></i>
+                    <span id="searchText">Search</span>
+                </button>
+            </div>
+
+            <!-- Button Group -->
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="viewFavoritesBtn">
+                    Favorites (<span id="favCount">0</span>)
+                </button>
+                <button class="btn btn-secondary" id="clearFiltersBtn">
+                    Clear Filters
+                </button>
+            </div>
+
+            <!-- Recent Searches -->
+            <div class="recent-searches" id="recentSearches" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4>Recent Searches</h4>
+                    <button class="clear-history-btn" id="clearHistoryBtn" aria-label="Clear search history">
+                        Clear All
+                    </button>
+                </div>
+                <div class="search-history-items" id="searchHistoryItems"></div>
+            </div>
+
+            <!-- Alert Container for Messages -->
+            <div id="alertContainer" role="alert" aria-live="polite"></div>
+        </section>
+
+        <!-- Results Container -->
+        <main id="resultsContainer"></main>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prevPage">
+                <i class="fas fa-chevron-left"></i>
+                Previous
+            </button>
+            <span class="page-info" id="pageInfo">Page 1</span>
+            <button id="nextPage">
+                Next
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Appointment Booking Modal -->
+       <!-- Appointment Booking Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="appointmentModal">&times;</span>
+            <h2><i class="fas fa-calendar-check"></i> Book Appointment</h2>
+            <div id="appointmentFacilityName" style="color: #64748b; margin-bottom: 20px;"></div>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="patientName"><i class="fas fa-user"></i> Full Name:</label>
+                    <input type="text" id="patientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientPhone"><i class="fas fa-phone"></i> Phone Number:</label>
+                    <input type="tel" id="patientPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientEmail"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" id="patientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate"><i class="fas fa-calendar"></i> Preferred Date:</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime"><i class="fas fa-clock"></i> Preferred Time:</label>
+                    <input type="time" id="appointmentTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentReason"><i class="fas fa-notes-medical"></i> Reason for Visit:</label>
+                    <textarea id="appointmentReason" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Submit Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Map View Modal -->
+    <div id="mapModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" data-modal="mapModal">&times;</span>
+            <h2 id="mapTitle"><i class="fas fa-map-marked-alt"></i> Facility Location</h2>
+            <div id="map" style="height: 450px; margin-top: 20px; border-radius: 12px; overflow: hidden;"></div>
+            <div id="mapDetails" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Footer with Attribution -->
+    <footer>
+        <p>Powered by <a href="https://rapidapi.com/" target="_blank" rel="noopener noreferrer">Google Places API (New V2)</a> & <a href="https://rapidapi.com/" target="_blank" rel="noopener noreferrer">Google Street View API</a></p>
+        <p>© 2025 HealthHub Bridge - Global Medical Facility Finder | Healthcare Information Worldwide</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+/** 
+ * MediFinder - Global Medical Facility Finder
+ * Main Application JavaScript
+ */
+
+/** Application state management */
+let state = {
+    facilities: [],
+    filteredFacilities: [],
+    cache: {},
+    favorites: JSON.parse(localStorage.getItem('medifinder_favorites') || '[]'),
+    searchHistory: JSON.parse(localStorage.getItem('medifinder_history') || '[]'),
+    currentPage: 1,
+    itemsPerPage: 9,
+    userLocation: null,
+    currentFacilityForAppointment: null,
+    viewingFavorites: false
+};
+
+const CACHE_DURATION = 600000;
+
+/** DOM element references for performance optimization */
+const DOM = {
+    searchBtn: document.getElementById('searchBtn'),
+    searchInput: document.getElementById('searchInput'),
+    facilityType: document.getElementById('facilityType'),
+    sortBy: document.getElementById('sortBy'),
+    maxDistance: document.getElementById('maxDistance'),
+
+    alertContainer: document.getElementById('alertContainer'),
+    resultsContainer: document.getElementById('resultsContainer'),
+    viewFavoritesBtn: document.getElementById('viewFavoritesBtn'),
+    clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+    useLocationBtn: document.getElementById('useLocationBtn'),
+    recentSearches: document.getElementById('recentSearches'),
+    searchHistoryItems: document.getElementById('searchHistoryItems'),
+    clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+
+    pagination: document.getElementById('pagination'),
+    prevPage: document.getElementById('prevPage'),
+    nextPage: document.getElementById('nextPage'),
+    pageInfo: document.getElementById('pageInfo'),
+    favCount: document.getElementById('favCount'),
+    appointmentModal: document.getElementById('appointmentModal'),
+    appointmentForm: document.getElementById('appointmentForm'),
+    appointmentFacilityName: document.getElementById('appointmentFacilityName'),
+    mapModal: document.getElementById('mapModal'),
+    mapTitle: document.getElementById('mapTitle'),
+    mapDetails: document.getElementById('mapDetails')
+};
+
+/** Event listener initialization */
+function initEventListeners() {
+    DOM.searchBtn.addEventListener('click', handleSearch);
+    DOM.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSearch();
+    });
+    DOM.sortBy.addEventListener('change', () => {
+        if (state.facilities.length > 0) applyFiltersAndRender();
+    });
+    DOM.maxDistance.addEventListener('input', () => {
+        if (state.facilities.length > 0) applyFiltersAndRender();
+    });
+    DOM.viewFavoritesBtn.addEventListener('click', showFavorites);
+    DOM.clearFiltersBtn.addEventListener('click', clearFilters);
+    DOM.useLocationBtn.addEventListener('click', useCurrentLocation);
+    DOM.clearHistoryBtn.addEventListener('click', clearSearchHistory);
+    DOM.prevPage.addEventListener('click', () => changePage(-1));
+    DOM.nextPage.addEventListener('click', () => changePage(1));
+    
+    // Event delegation for facility cards
+    DOM.resultsContainer.addEventListener('click', (e) => {
+        const facilityCard = e.target.closest('[data-facility-id]');
+        if (!facilityCard) return;
+        
+        const facilityId = facilityCard.dataset.facilityId;
+        if (!facilityId) return;
+        
+        if (e.target.closest('.favorite-btn')) {
+            e.preventDefault();
+            toggleFavorite(facilityId);
+        } else if (e.target.closest('.btn-book')) {
+            e.preventDefault();
+            openBookingModal(facilityId);
+        } else if (e.target.closest('.btn-map')) {
+            e.preventDefault();
+            openMapModal(facilityId);
+        }
+    });
+    
+    // Modal close buttons
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', (e) => {
+            const modalId = e.target.getAttribute('data-modal');
+            if (modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        });
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    });
+    
+    // Appointment form submission
+    DOM.appointmentForm.addEventListener('submit', handleAppointmentSubmit);
+}
+
+/** Input validation and sanitization */
+function validateInput(input) {
+    if (!input || input.trim().length < 2) {
+        return { valid: false, message: 'Please enter at least 2 characters' };
+    }
+    
+    const sanitized = input.replace(/[<>"'\\\/]/g, '').trim();
+    
+    if (sanitized.length === 0) {
+        return { valid: false, message: 'Please enter valid location characters' };
+    }
+    
+    return { valid: true, sanitized };
+}
+
+/** Geocoding service integration - Get coordinates from location name */
+async function getLocationCoordinates(location) {
+    // Use OpenStreetMap for reliable geocoding
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+    const data = await response.json();
+    
+    if (!data || data.length === 0) {
+        throw new Error('Location not found. Please try a different location or be more specific.');
+    }
+    
+    return {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+        displayName: data[0].display_name
+    };
+}
+
+/** Medical facility search API integration */
+async function searchMedicalFacilities(type, refLat, refLon) {
+    console.log(`Searching for ${type} near ${refLat}, ${refLon}`);
+    
+    // Always use OpenStreetMap for reliable results
+    const amenityMap = {
+        hospital: 'hospital',
+        clinic: 'clinic',
+        pharmacy: 'pharmacy', 
+        dentist: 'dentist',
+        optical: 'optician'
+    };
+    
+    const amenity = amenityMap[type];
+    const radius = parseFloat(DOM.maxDistance.value) / 111; // Convert km to degrees (rough)
+    
+    // Search in a bounding box around the location
+    const bbox = {
+        south: refLat - radius,
+        west: refLon - radius, 
+        north: refLat + radius,
+        east: refLon + radius
+    };
+    
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(amenity)}&format=json&limit=50&addressdetails=1&extratags=1&bounded=1&viewbox=${bbox.west},${bbox.north},${bbox.east},${bbox.south}`;
+    
+    console.log('API URL:', url);
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+        const data = await response.json();
+        
+        console.log('API Response:', data.length, 'results');
+        
+        if (!data || data.length === 0) {
+            return [];
+        }
+        
+        // Filter results by distance and return formatted data
+        const maxDistanceKm = parseFloat(DOM.maxDistance.value);
+        const facilities = data.map(place => {
+            const distance = calculateDistance(refLat, refLon, parseFloat(place.lat), parseFloat(place.lon));
+            return {
+                id: place.place_id,
+                name: extractFacilityName(place, type),
+                address: formatAddress(place.address),
+                phone: place.extratags?.phone || place.extratags?.['contact:phone'] || 'Not available',
+                website: place.extratags?.website || place.extratags?.['contact:website'] || null,
+                type: type,
+                lat: parseFloat(place.lat),
+                lon: parseFloat(place.lon),
+                distance: distance,
+                openingHours: place.extratags?.opening_hours || null,
+                emergency: place.extratags?.emergency === 'yes' || type === 'hospital',
+                rating: generateMockRating()
+            };
+        }).filter(facility => parseFloat(facility.distance) <= maxDistanceKm);
+        
+        console.log('Filtered facilities:', facilities.length);
+        return facilities;
+        
+    } catch (error) {
+        console.error('OpenStreetMap API error:', error);
+        throw error;
+    }
+
+}
+
+function extractFacilityName(place, type) {
+    if (place.name) return place.name;
+    if (place.display_name) {
+        const parts = place.display_name.split(',');
+        return parts[0] || 'Medical Facility';
+    }
+    return `${type.charAt(0).toUpperCase() + type.slice(1)} Facility`;
+}
+
+function formatAddress(addressObj) {
+    if (!addressObj) return 'Address not available';
+    const parts = [
+        addressObj.house_number,
+        addressObj.road,
+        addressObj.suburb || addressObj.neighbourhood,
+        addressObj.city || addressObj.town || addressObj.village,
+        addressObj.state || addressObj.county,
+        addressObj.country
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'Address not available';
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    return distance.toFixed(2);
+}
+
+function generateMockRating() {
+    return (Math.random() * 1.5 + 3.5).toFixed(1);
+}
+
+/** Cache management functions */
+function getCacheKey(location, type) {
+    return `${location.toLowerCase().trim()}-${type}`;
+}
+
+function isCacheValid(cacheKey) {
+    const cached = state.cache[cacheKey];
+    return cached && (Date.now() - cached.timestamp) < CACHE_DURATION;
+}
+
+function saveToCache(cacheKey, data) {
+    // Clean expired entries
+    const now = Date.now();
+    Object.keys(state.cache).forEach(key => {
+        if (now - state.cache[key].timestamp > CACHE_DURATION) {
+            delete state.cache[key];
+        }
+    });
+    
+    state.cache[cacheKey] = {
+        data: data,
+        timestamp: now
+    };
+}
+
+function getFromCache(cacheKey) {
+    if (isCacheValid(cacheKey)) {
+        return state.cache[cacheKey].data;
+    }
+    return null;
+}
+
+/** Search history management */
+function saveToHistory(location, type) {
+    const historyItem = {
+        location,
+        type,
+        timestamp: Date.now()
+    };
+    
+    state.searchHistory = state.searchHistory.filter(
+        item => !(item.location === location && item.type === type)
+    );
+    state.searchHistory.unshift(historyItem);
+    state.searchHistory = state.searchHistory.slice(0, 5);
+    
+    localStorage.setItem('medifinder_history', JSON.stringify(state.searchHistory));
+    renderSearchHistory();
+}
+
+function renderSearchHistory() {
+    if (state.searchHistory.length === 0) {
+        DOM.recentSearches.style.display = 'none';
+        return;
+    }
+    
+    DOM.recentSearches.style.display = 'block';
+    DOM.searchHistoryItems.innerHTML = state.searchHistory.map(item => 
+        `<div class="history-item" onclick="repeatSearch('${escapeHtml(item.location)}', '${item.type}')">
+            ${escapeHtml(item.location)} (${item.type})
+        </div>`
+    ).join('');
+}
+
+function clearSearchHistory() {
+    state.searchHistory = [];
+    localStorage.removeItem('medifinder_history');
+    DOM.recentSearches.style.display = 'none';
+    loadDefaultFacilities();
+}
+
+function repeatSearch(location, type) {
+    DOM.searchInput.value = location;
+    DOM.facilityType.value = type;
+    handleSearch();
+}
+
+/** Use current location functionality */
+async function useCurrentLocation() {
+    if (!navigator.geolocation) {
+        showAlert('<i class="fas fa-exclamation-triangle"></i> Geolocation is not supported by your browser', 'error');
+        return;
+    }
+
+    updateButtonState(true, DOM.useLocationBtn, 'Getting location...');
+    
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            state.userLocation = {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+            };
+            
+            try {
+                // Reverse geocode to get location name
+                const url = `https://nominatim.openstreetmap.org/reverse?lat=${state.userLocation.lat}&lon=${state.userLocation.lon}&format=json`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+                const data = await response.json();
+                
+                const locationName = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Your Location';
+                DOM.searchInput.value = locationName;
+                
+                showAlert(`<i class="fas fa-map-marker-alt"></i> Location detected: ${locationName}`, 'success');
+                handleSearch();
+            } catch (error) {
+                showAlert('<i class="fas fa-exclamation-triangle"></i> Could not determine location name', 'error');
+            } finally {
+                updateButtonState(false, DOM.useLocationBtn, '<i class="fas fa-location-arrow"></i>');
+            }
+        },
+        (error) => {
+            updateButtonState(false, DOM.useLocationBtn, '<i class="fas fa-location-arrow"></i>');
+            showAlert('<i class="fas fa-exclamation-triangle"></i> Unable to get your location. Please enable location services.', 'error');
+        }
+    );
+}
+
+/** Primary search execution handler */
+async function handleSearch() {
+    const validation = validateInput(DOM.searchInput.value);
+    if (!validation.valid) {
+        showAlert(validation.message, 'warning');
+        return;
+    }
+
+    const location = validation.sanitized;
+    const cacheKey = getCacheKey(location, DOM.facilityType.value);
+    const cachedData = getFromCache(cacheKey);
+    
+    if (cachedData) {
+        state.facilities = cachedData;
+        const cacheAge = Math.round((Date.now() - state.cache[cacheKey].timestamp) / 60000);
+        const facilityTypeText = getFacilityTypeText(DOM.facilityType.value);
+        showAlert(`Successfully located ${cachedData.length} ${facilityTypeText} in ${location} <span class="cache-indicator"><i class="fas fa-database"></i> Cached ${cacheAge} min ago</span>`, 'success');
+        applyFiltersAndRender();
+        saveToHistory(location, DOM.facilityType.value);
+        return;
+    }
+
+    updateButtonState(true, DOM.searchBtn, 'Searching...');
+    clearAlerts();
+    showLoader();
+
+    try {
+        const locationCoords = await getLocationCoordinates(location);
+        const facilities = await searchMedicalFacilities(
+            DOM.facilityType.value,
+            locationCoords.lat,
+            locationCoords.lon
+        );
+        
+        state.facilities = facilities;
+        
+        if (facilities.length > 0) {
+            saveToCache(cacheKey, facilities);
+            saveToHistory(location, DOM.facilityType.value);
+        }
+        
+        const formattedLocation = locationCoords.displayName.split(',').slice(0, 3).join(',');
+        
+        if (facilities.length === 0) {
+            showAlert(
+                `No ${getFacilityTypeText(DOM.facilityType.value)} found in ${formattedLocation}. Try increasing the search radius or searching a different area.`,
+                'warning'
+            );
+        } else {
+            showAlert(`Successfully located ${facilities.length} ${getFacilityTypeText(DOM.facilityType.value)} in ${formattedLocation}`, 'success');
+        }
+        
+        applyFiltersAndRender();
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        const errorMsg = error.message || 'Unable to complete search. Please try again.';
+        showAlert(`<i class="fas fa-exclamation-triangle"></i> Error: ${errorMsg}`, 'error');
+        renderEmptyState();
+    } finally {
+        updateButtonState(false, DOM.searchBtn, 'Search');
+    }
+}
+
+function getFacilityTypeText(type) {
+    const types = {
+        hospital: 'hospitals',
+        clinic: 'clinics',
+        pharmacy: 'pharmacies',
+        dentist: 'dental facilities',
+        optical: 'optical centers'
+    };
+    return types[type] || 'facilities';
+}
+
+/** Filter application and result rendering */
+function applyFiltersAndRender() {
+    const maxDist = parseFloat(DOM.maxDistance.value);
+    
+    if (state.viewingFavorites) {
+        state.filteredFacilities = state.facilities.filter(f => 
+            state.favorites.includes(String(f.id)) && parseFloat(f.distance) <= maxDist
+        );
+    } else {
+        state.filteredFacilities = state.facilities.filter(f => 
+            parseFloat(f.distance) <= maxDist
+        );
+    }
+    
+    state.currentPage = 1;
+    renderResults();
+}
+
+/** Search results rendering with pagination */
+function renderResults() {
+    if (state.filteredFacilities.length === 0) {
+        renderEmptyState();
+        DOM.pagination.style.display = 'none';
+        return;
+    }
+
+    let sortedFacilities = state.filteredFacilities.slice();
+    
+    switch(DOM.sortBy.value) {
+        case 'distance':
+            sortedFacilities.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+            break;
+        case 'rating':
+            sortedFacilities.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+            break;
+        case 'az':
+            sortedFacilities.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'za':
+            sortedFacilities.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+    }
+
+    const totalPages = Math.ceil(sortedFacilities.length / state.itemsPerPage);
+    const startIdx = (state.currentPage - 1) * state.itemsPerPage;
+    const endIdx = startIdx + state.itemsPerPage;
+    const paginatedFacilities = sortedFacilities.slice(startIdx, endIdx);
+
+    const backButton = state.viewingFavorites ? `
+        <button class="btn btn-primary" onclick="backToAllResults()" style="margin-right: 15px;">
+            Back to All Results
+        </button>
+    ` : '';
+
+    const html = `
+        <div class="results-header">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                ${backButton}
+                <span>Showing ${startIdx + 1}-${Math.min(endIdx, sortedFacilities.length)} of ${sortedFacilities.length} ${state.viewingFavorites ? 'favorite facilities' : getFacilityTypeText(DOM.facilityType.value)}</span>
+            </div>
+            <div style="position: relative;">
+                <input type="text" 
+                       class="search-results-input" 
+                       id="searchWithinResults" 
+                       placeholder="Search within results..."
+                       style="max-width: 300px; padding-left: 45px;">
+                <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+            </div>
+        </div>
+        <div class="facilities-grid">
+            ${paginatedFacilities.map(facility => createFacilityCard(facility)).join('')}
+        </div>
+    `;
+
+    DOM.resultsContainer.innerHTML = html;
+
+    if (totalPages > 1) {
+        DOM.pagination.style.display = 'flex';
+        DOM.pageInfo.textContent = `Page ${state.currentPage} of ${totalPages}`;
+        DOM.prevPage.disabled = state.currentPage === 1;
+        DOM.nextPage.disabled = state.currentPage === totalPages;
+    } else {
+        DOM.pagination.style.display = 'none';
+    }
+
+    const searchWithin = document.getElementById('searchWithinResults');
+    if (searchWithin) {
+        searchWithin.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.facility-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        });
+    }
+}
+
+/** Generate facility card HTML template */
+function createFacilityCard(facility) {
+    const isFavorite = state.favorites.includes(String(facility.id));
+    const favoriteIcon = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+    const phoneLink = facility.phone !== 'Not available' 
+        ? `<a href="tel:${facility.phone}">${escapeHtml(facility.phone)}</a>` 
+        : facility.phone;
+    const stars = '⭐'.repeat(Math.round(parseFloat(facility.rating)));
+
+    return `
+        <div class="facility-card" id="facility-${facility.id}" data-facility-id="${facility.id}">
+            <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" aria-label="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
+                <i class="${favoriteIcon}"></i>
+            </button>
+            
+            <div class="facility-type-badge">${getFacilityTypeBadge(facility.type)}</div>
+            <div class="facility-name">${escapeHtml(facility.name)}</div>
+
+            <div class="detail-row">
+                <i class="fas fa-star"></i>
+                <div>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(facility.name + ' ' + facility.address + ' reviews')}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: none;">
+                        ${stars} ${facility.rating} Rating
+                    </a>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <strong>Address:</strong> ${escapeHtml(facility.address)}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <i class="fas fa-phone"></i>
+                <div><strong>Phone:</strong> ${phoneLink}</div>
+            </div>
+
+            <div class="detail-row">
+                <i class="fas fa-route"></i>
+                <div><strong>Distance:</strong> ${facility.distance} km away</div>
+            </div>
+
+            ${facility.openingHours && facility.openingHours !== 'Hours not available' ? `
+                <div class="detail-row">
+                    <i class="fas fa-clock"></i>
+                    <div><strong>Hours:</strong> ${escapeHtml(facility.openingHours)}</div>
+                </div>
+            ` : ''}
+
+            ${facility.emergency ? `
+                <div class="detail-row" style="color: #dc2626;">
+                    <i class="fas fa-ambulance"></i>
+                    <div><strong>Emergency Services Available</strong></div>
+                </div>
+            ` : ''}
+
+            ${facility.website ? `
+                <div class="detail-row">
+                    <i class="fas fa-globe"></i>
+                    <div>
+                        <a href="${escapeHtml(facility.website)}" target="_blank" rel="noopener noreferrer">
+                            Visit Website
+                        </a>
+                    </div>
+                </div>
+            ` : ''}
+
+            <div class="card-actions">
+                <button class="action-btn btn-book">
+                    <i class="fas fa-calendar-check"></i> Book
+                </button>
+                <button class="action-btn btn-map">
+                    <i class="fas fa-map"></i> Map
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function getFacilityTypeBadge(type) {
+    const badges = {
+        hospital: 'Hospital',
+        clinic: 'Clinic',
+        pharmacy: 'Pharmacy',
+        dentist: 'Dental',
+        optical: 'Optical'
+    };
+    return badges[type] || 'Medical Facility';
+}
+
+/** Favorite facility management */
+function toggleFavorite(facilityId) {
+    const id = String(facilityId);
+    const index = state.favorites.indexOf(id);
+    
+    if (index > -1) {
+        state.favorites.splice(index, 1);
+    } else {
+        state.favorites.push(id);
+    }
+    
+    localStorage.setItem('medifinder_favorites', JSON.stringify(state.favorites));
+    updateFavoriteCount();
+    
+    const card = document.getElementById(`facility-${id}`);
+    if (card) {
+        const btn = card.querySelector('.favorite-btn');
+        const icon = btn.querySelector('i');
+        const isFavorite = state.favorites.includes(id);
+        
+        if (state.viewingFavorites && !isFavorite) {
+            // If viewing favorites and item was removed, hide the card immediately
+            card.style.display = 'none';
+            
+            // Update the facilities array to remove the unfavorited item
+            state.facilities = state.facilities.filter(f => String(f.id) !== id);
+            
+            // Re-render to update pagination and counts
+            setTimeout(() => {
+                applyFiltersAndRender();
+            }, 100);
+        } else {
+            // Normal favorite toggle behavior
+            icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+            btn.classList.toggle('favorited', isFavorite);
+            btn.setAttribute('aria-label', isFavorite ? 'Remove from favorites' : 'Add to favorites');
+        }
+    }
+}
+
+function updateFavoriteCount() {
+    DOM.favCount.textContent = state.favorites.length;
+}
+
+/** Display user's favorite facilities */
+function showFavorites() {
+    if (state.favorites.length === 0) {
+        showAlert('<i class="fas fa-info-circle"></i> No favorites saved yet. Click the heart icon on facilities to save them!', 'info');
+        return;
+    }
+
+    // Get all favorite facilities from localStorage cache
+    const allFavoriteFacilities = [];
+    
+    // Check all cached searches for favorite facilities
+    Object.keys(state.cache).forEach(cacheKey => {
+        if (isCacheValid(cacheKey)) {
+            const cachedFacilities = state.cache[cacheKey].data;
+            const favoritesFromCache = cachedFacilities.filter(f => 
+                state.favorites.includes(String(f.id))
+            );
+            allFavoriteFacilities.push(...favoritesFromCache);
+        }
+    });
+    
+    // Also check current facilities
+    const currentFavorites = state.facilities.filter(f => 
+        state.favorites.includes(String(f.id))
+    );
+    
+    // Combine and deduplicate
+    const combinedFavorites = [...allFavoriteFacilities, ...currentFavorites];
+    const uniqueFavorites = combinedFavorites.filter((facility, index, self) => 
+        index === self.findIndex(f => f.id === facility.id)
+    );
+    
+    if (uniqueFavorites.length === 0) {
+        showAlert('<i class="fas fa-exclamation-triangle"></i> Your favorite facilities are no longer available. Try searching for them again!', 'warning');
+        return;
+    }
+    
+    // Set favorites as current facilities for display
+    state.facilities = uniqueFavorites;
+    state.viewingFavorites = true;
+    state.currentPage = 1;
+    
+    showAlert(`<i class="fas fa-heart"></i> Showing ${uniqueFavorites.length} favorite facilities`, 'info');
+    applyFiltersAndRender();
+}
+
+/** Return to all search results from favorites */
+function backToAllResults() {
+    state.viewingFavorites = false;
+    state.currentPage = 1;
+    clearAlerts();
+    applyFiltersAndRender();
+}
+
+/** Reset all search filters and state */
+function clearFilters() {
+    DOM.searchInput.value = '';
+    DOM.facilityType.value = 'hospital';
+    DOM.sortBy.value = 'distance';
+    DOM.maxDistance.value = '25';
+    state.facilities = [];
+    state.filteredFacilities = [];
+    state.viewingFavorites = false;
+    state.currentPage = 1;
+    clearAlerts();
+    DOM.pagination.style.display = 'none';
+    loadDefaultFacilities();
+}
+
+/** Pagination navigation handler */
+function changePage(direction) {
+    state.currentPage += direction;
+    renderResults();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** Appointment booking modal */
+function openBookingModal(facilityId) {
+    const facility = state.facilities.find(f => String(f.id) === String(facilityId));
+    if (!facility) {
+        console.error('Facility not found:', facilityId);
+        return;
+    }
+    
+    state.currentFacilityForAppointment = facility;
+    DOM.appointmentFacilityName.textContent = `Booking appointment at ${facility.name}`;
+    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointmentDate').min = today;
+    
+    DOM.appointmentModal.style.display = 'block';
+}
+
+function handleAppointmentSubmit(e) {
+    e.preventDefault();
+    
+    const facility = state.currentFacilityForAppointment;
+    const appointmentData = {
+        facility: facility.name,
+        facilityAddress: facility.address,
+        facilityPhone: facility.phone,
+        patientName: document.getElementById('patientName').value,
+        patientPhone: document.getElementById('patientPhone').value,
+        patientEmail: document.getElementById('patientEmail').value,
+        date: document.getElementById('appointmentDate').value,
+        time: document.getElementById('appointmentTime').value,
+        reason: document.getElementById('appointmentReason').value,
+        timestamp: new Date().toISOString()
+    };
+    
+    DOM.appointmentModal.style.display = 'none';
+    
+    const confirmationMessage = `
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-top: 20px;">
+            <h3 style="color: #166534; margin: 0 0 15px 0;"><i class="fas fa-check-circle"></i> Appointment Request Confirmed</h3>
+            <div style="color: #166534; line-height: 1.6;">
+                <p><strong>Patient:</strong> ${appointmentData.patientName}</p>
+                <p><strong>Facility:</strong> ${facility.name}</p>
+                <p><strong>Address:</strong> ${facility.address}</p>
+                <p><strong>Date & Time:</strong> ${appointmentData.date} at ${appointmentData.time}</p>
+                <p><strong>Reason:</strong> ${appointmentData.reason}</p>
+                <p><strong>Contact:</strong> ${appointmentData.patientPhone}</p>
+                <hr style="margin: 15px 0; border: 1px solid #86efac;">
+                <p><strong>Next Steps:</strong> The facility will contact you at ${appointmentData.patientPhone} to confirm your appointment.</p>
+            </div>
+        </div>
+    `;
+    
+    showAlert(confirmationMessage, 'success');
+    DOM.appointmentForm.reset();
+}
+
+/** Map view modal */
+function openMapModal(facilityId) {
+    const facility = state.facilities.find(f => String(f.id) === String(facilityId));
+    if (!facility) {
+        console.error('Facility not found:', facilityId);
+        return;
+    }
+    
+    DOM.mapTitle.innerHTML = `<i class="fas fa-map-marked-alt"></i> ${escapeHtml(facility.name)}`;
+    DOM.mapDetails.innerHTML = `
+        <div class="detail-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <div><strong>Address:</strong> ${escapeHtml(facility.address)}</div>
+        </div>
+        <div class="detail-row">
+            <i class="fas fa-phone"></i>
+            <div><strong>Phone:</strong> ${facility.phone !== 'Not available' ? `<a href="tel:${facility.phone}">${escapeHtml(facility.phone)}</a>` : facility.phone}</div>
+        </div>
+        <div class="detail-row">
+            <i class="fas fa-route"></i>
+            <div><strong>Distance:</strong> ${facility.distance} km from search location</div>
+        </div>
+        <div class="street-view-container">
+            <h4><i class="fas fa-street-view"></i> Street View</h4>
+            <div id="streetViewImage" class="street-view-image">Loading street view...</div>
+        </div>
+    `;
+    
+    DOM.mapModal.style.display = 'block';
+    
+    setTimeout(() => {
+        initializeMap(facility.lat, facility.lon, facility.name);
+        loadStreetView(facility.lat, facility.lon, facility.address);
+    }, 100);
+}
+
+function initializeMap(lat, lon, name) {
+    const mapContainer = document.getElementById('map');
+    mapContainer.innerHTML = '';
+    
+    const map = L.map('map').setView([lat, lon], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    L.marker([lat, lon]).addTo(map)
+        .bindPopup(`<strong>${escapeHtml(name)}</strong>`)
+        .openPopup();
+    
+    if (state.userLocation) {
+        L.marker([state.userLocation.lat, state.userLocation.lon], {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(map).bindPopup('Your Location');
+    }
+}
+
+/** Google Street View API integration */
+function loadStreetView(lat, lon, address) {
+    const streetViewContainer = document.getElementById('streetViewImage');
+    if (!streetViewContainer) return;
+    
+    const location = encodeURIComponent(address || `${lat},${lon}`);
+    const apiKey = '4a6c863bdamsh345f35751f94ffdp1cbed4jsne576b73880ce';
+    const apiUrl = `https://google-map-places.p.rapidapi.com/maps/api/streetview?size=600x400&source=default&return_error_code=true&location=${location}`;
+    
+    streetViewContainer.innerHTML = '<div class="street-view-loading"><i class="fas fa-spinner fa-spin"></i> Loading street view...</div>';
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'x-rapidapi-host': 'google-map-places.p.rapidapi.com',
+            'x-rapidapi-key': apiKey
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Street view not available');
+    })
+    .then(blob => {
+        const imageUrl = URL.createObjectURL(blob);
+        streetViewContainer.innerHTML = `
+            <img src="${imageUrl}" alt="Street view of ${escapeHtml(address)}" class="street-view-img" />
+            <p class="street-view-caption">Street view of the facility location</p>
+        `;
+    })
+    .catch(error => {
+        console.log('Street view error:', error);
+        streetViewContainer.innerHTML = `
+            <div class="street-view-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Street view not available for this location</p>
+            </div>
+        `;
+    });
+}
+
+/** Empty state UI rendering */
+function renderEmptyState() {
+    DOM.resultsContainer.innerHTML = `
+        <div class="empty-state">
+            <h3>Find Medical Facilities</h3>
+            <p>Search for hospitals, clinics, pharmacies, dental centers, and optical facilities based on your location</p>
+            <div class="instructions-box">
+                <strong>How to use HealthHub Bridge:</strong><br><br>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div>Enter any location in East Africa (e.g., Kigali, Nairobi, Kampala, Dar es Salaam, Addis Ababa)</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div>Or click the location button to use your current position</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div>Select the type of medical facility you need</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">4</div>
+                    <div>Adjust the maximum distance to customize your search radius</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">5</div>
+                    <div>Click "Search" to find nearby facilities with ratings and contact info</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">6</div>
+                    <div>Save your favorites and book appointments directly</div>
+                </div>
+
+                <br>
+                <strong><i class="fas fa-lightbulb"></i> Try searching for your city or use your current location to get started!</strong>
+            </div>
+        </div>
+    `;
+}
+
+/** Loading state UI display */
+function showLoader() {
+    DOM.resultsContainer.innerHTML = `
+        <div class="loader">
+            <div class="spinner"></div>
+            <div class="loader-text">Searching for medical facilities worldwide...</div>
+        </div>
+    `;
+}
+
+/** User notification system */
+function showAlert(message, type) {
+    const iconMap = {
+        success: 'fas fa-check-circle',
+        info: 'fas fa-info-circle',
+        warning: 'fas fa-exclamation-triangle',
+        error: 'fas fa-times-circle'
+    };
+
+    DOM.alertContainer.innerHTML = `
+        <div class="alert alert-${type}">
+            <i class="${iconMap[type]}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+            if (DOM.alertContainer.querySelector('.alert')?.innerHTML.includes(message.substring(0, 20))) {
+                clearAlerts();
+            }
+        }, 5000);
+    }
+}
+
+function clearAlerts() {
+    DOM.alertContainer.innerHTML = '';
+}
+
+/** Button state management */
+function updateButtonState(loading, button = DOM.searchBtn, text = 'Search') {
+    if (!button) return;
+    
+    button.disabled = loading;
+    
+    if (button === DOM.searchBtn) {
+        const searchText = document.getElementById('searchText');
+        const icon = button.querySelector('i');
+        
+        if (loading) {
+            searchText.textContent = 'Searching...';
+            icon.className = 'fas fa-spinner fa-spin';
+        } else {
+            searchText.textContent = text;
+            icon.className = 'fas fa-search';
+        }
+    } else if (button === DOM.useLocationBtn) {
+        button.innerHTML = loading ? '<i class="fas fa-spinner fa-spin"></i>' : text;
+    }
+}
+
+/** HTML sanitization utility */
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, char => map[char]);
+}
+
+/** Load favorites from localStorage */
+function loadFavorites() {
+    const stored = localStorage.getItem('medifinder_favorites');
+    if (stored) {
+        state.favorites = JSON.parse(stored);
+    }
+}
+
+/** Load default medical facilities on startup */
+async function loadDefaultFacilities() {
+    // Try to get user's current location first
+    if (navigator.geolocation) {
+        showAlert(`<i class="fas fa-location-arrow"></i> Detecting your location to find nearby medical facilities...`, 'info');
+        
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    state.userLocation = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    };
+                    
+                    // Reverse geocode to get location name
+                    const url = `https://nominatim.openstreetmap.org/reverse?lat=${state.userLocation.lat}&lon=${state.userLocation.lon}&format=json`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+                    const data = await response.json();
+                    
+                    const locationName = data.address?.city || data.address?.town || data.address?.village || data.address?.county || data.address?.state || data.address?.country || 'Your Location';
+                    DOM.searchInput.value = locationName;
+                    
+                    showAlert(`<i class="fas fa-map-marker-alt"></i> Loading medical facilities near ${locationName}...`, 'info');
+                    await handleSearch();
+                } catch (error) {
+                    console.error('Failed to get location name:', error);
+                    loadFallbackLocation();
+                }
+            },
+            (error) => {
+                console.log('Geolocation failed:', error);
+                loadFallbackLocation();
+            },
+            { timeout: 10000, enableHighAccuracy: false }
+        );
+    } else {
+        loadFallbackLocation();
+    }
+}
+
+/** Load fallback location when geolocation fails */
+async function loadFallbackLocation() {
+    const defaultLocations = ['Kigali', 'Nairobi', 'Kampala', 'Dar es Salaam', 'Addis Ababa'];
+    const randomLocation = defaultLocations[Math.floor(Math.random() * defaultLocations.length)];
+    
+    DOM.searchInput.value = randomLocation;
+    
+    showAlert(`<i class="fas fa-info-circle"></i> Loading medical facilities in ${randomLocation}...`, 'info');
+    
+    try {
+        await handleSearch();
+    } catch (error) {
+        console.error('Failed to load default facilities:', error);
+        renderEmptyState();
+    }
+}
+
+/** Application initialization */
+function init() {
+    // Check if all required DOM elements exist
+    const requiredElements = ['searchBtn', 'searchInput', 'facilityType', 'sortBy', 'maxDistance', 'alertContainer', 'resultsContainer'];
+    const missingElements = requiredElements.filter(id => !document.getElementById(id));
+    
+    if (missingElements.length > 0) {
+        console.error('Missing DOM elements:', missingElements);
+        document.body.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc2626;"><h2>Application Error</h2><p>Required page elements are missing. Please refresh the page.</p></div>';
+        return;
+    }
+    
+    initEventListeners();
+    loadFavorites();
+    renderSearchHistory();
+    updateFavoriteCount();
+    
+    // Load default facilities after a short delay
+    setTimeout(() => {
+        loadDefaultFacilities();
+    }, 500);
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+    </script>
+</body>
+</html>
