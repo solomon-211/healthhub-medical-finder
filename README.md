@@ -1,13 +1,10 @@
 # HealthHub Bridge - Global Medical Facility Finder
 This is an application for locating medical facilities based on an individual's location making it work perfectly across the globe with real-time API Integration, interactive maps, and appointment booking.
-
 ---
-
 ## Important URLs for the project
 
-**Demo Video**: https://youtu.be/BN70xcWhNkk 
+**Demo Video**: https://youtu.be/BN70xcWhNkk
 **Live Application**: http://www.solomonleek.tech
-
 
 ## Alternative Domain names to find live application on chrome browser or Google
 - solomonleek.tech
@@ -26,12 +23,10 @@ This is an application for locating medical facilities based on an individual's 
 10. Challenges & Solutions
 11. Future Enhancements
 
-
 ## 1. Overview
 
 ### Purpose:
-
-This is application is to bridge the gap that exists when finding medical facilities based on an individual's location and preferences especially when a person travel to a new location.
+This application is to bridge the gap that exists when finding medical facilities based on an individual's location and preferences, especially when a person travels to a new location.
 
 ### Target Audience:
 - Global residents
@@ -66,7 +61,7 @@ This is application is to bridge the gap that exists when finding medical facili
 
 **Load Balancer (Nginx)**
 - Traffic distribution and high availability
-- Uses round-robin load balancing algorithm 
+- Uses the round-robin load balancing algorithm
 - Automatic server health monitoring
 - Real-time monitoring on port 8080
 
@@ -74,6 +69,7 @@ This is application is to bridge the gap that exists when finding medical facili
 - Host the HealthHub application
 - Active-active configuration
 - Automatic traffic rerouting on server failure
+- UFW firewall for enhanced security
 
 **Application Layer**
 - **Frontend**: Single-page HTML application
@@ -116,26 +112,25 @@ This is application is to bridge the gap that exists when finding medical facili
 │   - No Secrets  │
 └─────────────────┘
 ```
-
 ## 3. Features
 
 ### Core Functionality
 - Global Medical facilities in the interests of the user (hospitals, clinics, pharmacies, dental centers, optical facilities)
 - Distance-based filtering (1-100km radius)
-- User friendly and interactive map with leaflet and street view integration
-- Appointment booking schedules on user preferable time and date
-- Favorite management system with interactive button for returning to the dashboard
-- Search and recent history and intelligent caching support by clear filter and clear all the recent search history
-- Responsive design applicable in mobile phones, tablets, and laptop
+- User-friendly and interactive map with leaflet and street view integration
+- Appointment booking schedules on the user's preferred time and date
+- Favorite management system with an interactive button for returning to the dashboard
+- Search and recent history, and intelligent caching support by clear filter and clear all the recent search history
+- Responsive design applicable to mobile phones, tablets, and laptops
 
 ### Technical Features
 
 **Search & Discovery**
 - Multi-API integration (Google Places API + OpenStreetMap fallback)
 - Intelligent geolocation with reverse geocoding
-- Explore through results by using search button without new API calls
-- Real time results scenarios with immediate distance calculations
-- User friendly filtering through various options; rating, and alphabetical order and real world application rating that have access to the main rating source
+- Explore through results by using the search button without new API calls
+- Real-time results scenarios with immediate distance calculations
+- User-friendly filtering through various options; rating, alphabetical order, and real real-world application rating that has access to the main rating source
 
 **Performance & Reliability**
 - Intelligent caching (10-minute system reducing API calls by 90%)
@@ -178,11 +173,12 @@ This is application is to bridge the gap that exists when finding medical facili
 - One Ubuntu server for Nginx load balancer
 - SSH access with sudo privileges
 - Basic Linux command line knowledge
+- Nginx is installed on all servers
 
 ### Step 1: Connect to Servers
 1. Create a repository and clone it to the container (webterm)
 2. CD into the repo directory
-3. Create README.md file and Index.html
+3. Create a README.md file and an Index.html
 4. Use SSH to connect to your web servers or hosting service
 
 ### Step 2: Prepare Web Directory
@@ -195,7 +191,6 @@ sudo mkdir -p healthhub
 sudo chown $USER:$USER healthhub
 cd healthhub
 ```
-
 ### Step 3: Upload Application Files
 **On your local machine**
 1. Navigate to the project directory containing Index.html and README.md
@@ -205,7 +200,6 @@ cd healthhub
 scp Index.html README.md ubuntu@web01:/var/www/healthhub/
 scp Index.html README.md ubuntu@web02:/var/www/healthhub/
 ```
-
 ### Step 4: Configure Web Servers
 **On both Web01 and Web02**
 
@@ -213,15 +207,14 @@ Create virtual host configuration:
 ```bash
 sudo nano /etc/nginx/sites-available/healthhub
 ```
-
 Add the following configuration:
 ```nginx
 server {
     listen 80;
     listen [::]:80;
-    
+   
     server_name solomonleek.tech www.solomonleek.tech _;
-    
+   
     root /var/www/healthhub;
     index index.html;
 
@@ -274,7 +267,6 @@ sudo nginx -t
 # Reload Nginx
 sudo systemctl reload nginx
 ```
-
 ### Step 5: Configure Firewall
 **On both Web01 and Web02**
 ```bash
@@ -283,26 +275,21 @@ sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw status
 ```
-
 ### Step 6: Configure Load Balancer
 **On Lb01**
-
-Connect to load balancer:
+Connect to the load balancer:
 ```bash
 ssh -i ~/.ssh/my_web-key ubuntu@54.236.248.230
 ```
-
 Install Nginx (if not already installed):
 ```bash
 sudo apt update
 sudo apt install nginx -y
 ```
-
 Configure Nginx load balancer:
 ```bash
 sudo nano /etc/nginx/sites-available/healthhub-lb
 ```
-
 Add the following configuration:
 ```nginx
 upstream healthhub_backend {
@@ -313,7 +300,7 @@ upstream healthhub_backend {
 server {
     listen 80;
     listen [::]:80;
-    
+   
     server_name solomonleek.tech www.solomonleek.tech;
 
     # Logging
@@ -323,20 +310,20 @@ server {
     # Proxy settings
     location / {
         proxy_pass http://healthhub_backend;
-        
+       
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+       
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        
+       
         proxy_buffering on;
         proxy_buffer_size 4k;
         proxy_buffers 8 4k;
-        
+       
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
     }
 
@@ -381,7 +368,6 @@ sudo systemctl status nginx
 curl -sI localhost
 curl localhost
 ```
-
 ### Step 8: Verify Deployment
 **Test Web Servers from local machine**:
 ```bash
@@ -394,7 +380,6 @@ curl http://54.211.4.59/
 # Test Load Balancer
 curl http://54.236.248.230/
 ```
-
 **Access Points**:
 - **Application**: http://54.236.248.230
 - **Load Test**: `curl -s http://54.236.248.230`
@@ -414,7 +399,6 @@ curl http://54.236.248.230/
 - Single-file architecture with CDN resources
 
 ## 7. Testing
-
 ### Basic Tests
 - Search functionality with various locations
 - Filter and sorting operations
@@ -429,7 +413,6 @@ curl http://54.236.248.230
 # Performance test
 ab -n 1000 -c 10 http://54.236.248.230/
 ```
-
 ## 8. Troubleshooting
 
 ### Common Issues
@@ -439,11 +422,9 @@ ab -n 1000 -c 10 http://54.236.248.230/
 - **Server DOWN in Nginx**: Test health check endpoints and port availability
 
 ### Error Handling
-
 **Comprehensive Error Management**
-
 API Error Handling:
-```javascript
+```JavaScript
 // Network failures
 try {
     const response = await fetch(apiUrl);
@@ -463,9 +444,7 @@ if (!data || data.length === 0) {
     showAlert('No facilities found. Try expanding your search radius.', 'warning');
 }
 ```
-
 ## 9. API Attribution
-
 ### APIs Used
 
 **Google Places API (New V2)**
@@ -506,7 +485,6 @@ if (!data || data.length === 0) {
 - **Documentation**: https://fontawesome.com/
 
 ### Credit & Attribution
-
 All APIs are properly credited throughout the application:
 - Footer attribution for Google APIs and OpenStreetMap
 - Map tiles include OpenStreetMap copyright
@@ -516,22 +494,22 @@ All APIs are properly credited throughout the application:
 ## 10. Challenges & Solutions
 
 ### Challenge 1: API Rate Limiting
-**Problem**: Google Places API has strict rate limits that could exhaust quickly with multiple users.
+**Problem**: Google Places API has strict rate limits that could be exhausted quickly with multiple users.
 
-**Solution**: 
-- Implemented intelligent 10-minute caching system
-- Reduced API calls by 90% through cache reuse
-- Added OpenStreetMap as fallback provider
+**Solution**:
+- Implemented an intelligent 10-minute caching system
+- Reduced API calls by about 90%
+- Used OpenStreetMap as a fallback if Google doesn't work
 - Displays cache age to users for transparency
 
 ### Challenge 2: Global Coverage
-**Problem**: Initial API selection was limited to specific regions.
+**Problem**: Initial API selection was limited to specific countries.
 
 **Solution**:
-- Integrated OpenStreetMap Nominatim for worldwide coverage
+- Used integrated OpenStreetMap Nominatim so that the application is global
 - Multi-provider architecture with automatic fallback
-- Tested with locations across 5 continents
-- Added reverse geocoding for location names
+- Tested with five East African cities and continents
+- Implemented reverse geocoding for coordinates to make places turn into names
 
 ### Challenge 3: Load Balancer Configuration
 **Problem**: Health checks were failing intermittently, causing server removal.
@@ -543,16 +521,16 @@ All APIs are properly credited throughout the application:
 - Implemented comprehensive logging
 
 ### Challenge 4: User Experience on Mobile
-**Problem**: Initial design wasn't mobile-friendly; buttons were too small, text was hard to read.
+**Initial design not being mobile-friendly; buttons were small, and hard for the text to read
 
 **Solution**:
-- Adopted mobile-first responsive design
-- Implemented CSS Grid and Flexbox
+- Mobile-first responsive design
+- Used CSS Grid and Flexbox
 - Tested on multiple device sizes
 - Added touch-friendly button sizing (minimum 44px)
 
 ### Challenge 5: API Key Security
-**Problem**: Risk of API keys being exposed in public repository.
+**Problem**: API keys' security purpose from being exposed in a public repository.
 
 **Solution**:
 - Created `.gitignore` to exclude configuration files
@@ -561,16 +539,16 @@ All APIs are properly credited throughout the application:
 - Implemented key rotation policy
 
 ### Challenge 6: Error Handling
-**Problem**: Users experiencing confusing errors when APIs failed.
+**Problem**: Users are experiencing confusing errors when APIs fail.
 
 **Solution**:
-- Implemented a comprehesive try-cash block throughout code that's user friendly 
+- Implemented a comprehensive try-catch block throughout the user-friendly code
 - User-friendly error messages with recovery steps
 - Automatic fallback to cached data
-- Graceful degradation when services unavailable
+- Graceful degradation when services are unavailable
 
 ### Challenge 7: Data Presentation
-**Problem**: Initial data dumps were overwhelming; users couldn't find relevant info.
+**The initial data interface was being overwhelmed, making users unable to find accurate information.
 
 **Solution**:
 - Implemented pagination (9 facilities per page)
@@ -579,7 +557,7 @@ All APIs are properly credited throughout the application:
 - Included search-within-results feature
 
 ### Challenge 8: Performance Optimization
-**Problem**: Page was slow to load with all assets and API calls.
+**Problem**: Page loaded slowly due to all assets and API calls.
 
 **Solution**:
 - Lazy loading for maps and images
@@ -588,7 +566,6 @@ All APIs are properly credited throughout the application:
 - Optimized DOM manipulation
 
 ## 11. Future Enhancements
-
 ### Planned Features
 - User authentication for personalized experience
 - Advanced filtering (insurance accepted, specialties)
@@ -607,5 +584,4 @@ All APIs are properly credited throughout the application:
 - Continuous monitoring and alerting systems
 
 ## License
-
 This project is open source. API usage subject to respective provider terms.
