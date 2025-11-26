@@ -5,11 +5,12 @@ This is an application for locating medical facilities based on an individual's 
 
 ## Important URLs for the project
 
+**Demo Video**: https://youtu.be/BN70xcWhNkk
 **Project Repository**: https://github.com/solomon-211/healthhub-medical-finder  
 **Live Application**: http://www.solomonleek.tech
-**Demo Video**: https://youtu.be/BN70xcWhNkk
 
-## Alternative Domain browser live application search on chrome and Google
+
+## Alternative Domain names to find live application on chrome browser or Google
 - solomonleek.tech
 - www.solomonleek.tech
 
