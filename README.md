@@ -6,7 +6,7 @@ This is an application for locating medical facilities based on an individual's 
 ## Important URLs for the project
 
 **Project Repository**: https://github.com/solomon-211/healthhub-medical-finder  
-**Live Application**: http://www.solomonleek.tech, http://solomonleek.tech, solomonleek.tech 
+**Live Application**: http://www.solomonleek.tech, http://solomonleek.tech, http://solomonleek.tech 
 **Demo Video**: https://youtu.be/BN70xcWhNkk
 
 ## Table of Contents
