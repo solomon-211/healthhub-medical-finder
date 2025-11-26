@@ -160,8 +160,8 @@ This is application is to bridge the gap that exists when finding medical facili
 - Leaflet 1.9.4 for interactive maps
 
 ### APIs
-- **Google Places API (V2)**: Primary facility search with ratings and contact details
-- **Google Street View API**: High-quality street-level imagery via RapidAPI
+- **Google Places API (V2)**: Primary medical facility search rendering ratings, address, and contact details
+- **Google Street View API**: High quality street-view level map via RapidAPI
 - **OpenStreetMap Nominatim**: Free geocoding and fallback facility search
 
 ### Infrastructure
@@ -405,7 +405,6 @@ curl http://54.236.248.230/
 - UFW firewall with restricted port access (22, 80, 443)
 - Input validation and XSS protection
 - No sensitive data exposure
-- HTTPS-ready configuration
 
 ### Performance Optimizations
 - Intelligent caching (10-minute system, 90% API call reduction)
@@ -470,7 +469,7 @@ if (!data || data.length === 0) {
 ### APIs Used
 
 **Google Places API (New V2)**
-- **Purpose**: Primary facility search with comprehensive data
+- **Purpose**: Primary medical facility search with comprehensive data
 - **Provider**: Google via RapidAPI
 - **Features**: Ratings, phone numbers, addresses, opening hours
 - **Documentation**: https://developers.google.com/maps/documentation/places/web-service/overview
@@ -565,7 +564,7 @@ All APIs are properly credited throughout the application:
 **Problem**: Users experiencing confusing errors when APIs failed.
 
 **Solution**:
-- Comprehensive try-catch blocks throughout code
+- Implemented a comprehesive try-cash block throughout code that's user friendly 
 - User-friendly error messages with recovery steps
 - Automatic fallback to cached data
 - Graceful degradation when services unavailable
@@ -599,6 +598,7 @@ All APIs are properly credited throughout the application:
 - Push notifications for appointment reminders
 - AI-powered facility recommendations
 - Offline mode with cached data access
+- Application database for storing data
 
 ### Performance Improvements
 - Further caching optimizations
