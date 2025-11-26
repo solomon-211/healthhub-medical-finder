@@ -1,5 +1,6 @@
 # HealthHub Bridge - Global Medical Facility Finder
-This is an application for locating medical facilities based on an individual's location, making it work perfectly across the globe with real-time API Integration, interactive maps, and appointment booking.
+
+- This is a web-based application for locating medical facilities based on an individual's location, making it work perfectly across the globe with real-time API integration, interactive maps, and appointment booking part with the medical facility.
 ---
 ## Important URLs for the project
 
