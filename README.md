@@ -1,12 +1,12 @@
 # HealthHub Bridge - Global Medical Facility Finder
-This is an application for locating medical facilities based on an individual's location making it work perfectly across the globe with real-time API Integration, interactive maps, and appointment booking.
+This is an application for locating medical facilities based on an individual's location, making it work perfectly across the globe with real-time API Integration, interactive maps, and appointment booking.
 ---
 ## Important URLs for the project
 
 **Demo Video**: https://youtu.be/BN70xcWhNkk
 **Live Application**: http://www.solomonleek.tech
 
-## Alternative Domain names to find live application on chrome browser or Google
+## Alternative Domain names to find live application on Chrome browser or Google
 - solomonleek.tech
 - www.solomonleek.tech
 
@@ -23,38 +23,35 @@ This is an application for locating medical facilities based on an individual's 
 10. Challenges & Solutions
 11. Future Enhancements
 
-## 1. Overview
+## 1. Overview of the Application
+HealthHub Bridge is a web-based application dedicated to helping users find nearby medical facilities based on the user's location and preferences, with comprehensive information and real-time data about the medical facilities fetched from multiple APIs to provide accurate results and data.
 
-### Purpose:
-This application is to bridge the gap that exists when finding medical facilities based on an individual's location and preferences, especially when a person travels to a new location.
-
-### Target Audience:
-- Global residents
-- International travelers
-- Healthcare professionals
-- Emergency responders
-- Expatriates navigating local healthcare systems (Researchers)
+### Target Audiences
+- Travellers are desperate for medical facilities based on the new location
+- Researchers
 
 ## 2. Architecture
 
 ### System Overview
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+__________________     ____________________    ___________________
 │                 │    │                  │    │                 │
 │   Client/User   │◄──►│  Load Balancer   │◄──►│   Web Servers   │
-│   (Browser)     │    │     (Nginx)      │    │    (Nginx)      │
-│                 │    │                  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+│     (Browser)   │    │     (Nginx)      │    │    (Nginx)      │
+│_________________│    │__________________│    │_________________│
+
+
                               │                         │
                               │                         │
                               ▼                         ▼
-                    ┌──────────────────┐    ┌─────────────────┐
+                    ___________________     __________________    
                     │                  │    │                 │
                     │  Stats Dashboard │    │  External APIs  │
                     │   (Port 8080)    │    │ Google Places   │
                     │                  │    │ Street View     │
-                    └──────────────────┘    │ OpenStreetMap   │
-                                            └─────────────────┘
+                    |__________________|    │ OpenStreetMap   |
+                                            │_________________|
+                                       
 ```
 
 ### Infrastructure Components
@@ -94,56 +91,56 @@ This application is to bridge the gap that exists when finding medical facilitie
 │   Port 22: SSH  │
 │   Port 80: HTTP │
 │   Port 8080: Stats │
-└─────────────────┘
+|__________________|
          │
          ▼
-┌─────────────────┐
+__________________
 │     Nginx       │
 │   - Rate Limiting│
 │   - Health Checks│
 │   - Load Balance │
-└─────────────────┘
+|__________________|
          │
          ▼
-┌─────────────────┐
+___________________
 │   Web Servers   │
 │   - Input Valid │
 │   - XSS Protect │
 │   - No Secrets  │
-└─────────────────┘
+|_________________|
+
 ```
 ## 3. Features
 
 ### Core Functionality
 - Global Medical facilities in the interests of the user (hospitals, clinics, pharmacies, dental centers, optical facilities)
-- Distance-based filtering (1-100km radius)
+- Max distance filtering manipulation (1-100km radius)
 - User-friendly and interactive map with leaflet and street view integration
 - Appointment booking schedules on the user's preferred time and date
-- Favorite management system with an interactive button for returning to the dashboard
+- Favorite management system with an interactive button for returning to the dashboard and pressing the heart icon to remove the favorite medical facility from the favorites
 - Search and recent history, and intelligent caching support by clear filter and clear all the recent search history
 - Responsive design applicable to mobile phones, tablets, and laptops
 
 ### Technical Features
 
 **Search & Discovery**
-- Multi-API integration (Google Places API + OpenStreetMap fallback)
-- Intelligent geolocation with reverse geocoding
-- Explore through results by using the search button without new API calls
-- Real-time results scenarios with immediate distance calculations
+- Multi-APIs Integration (Google Places API (V2), Google Street View API, and OpenStreetMap fallback)
+- Navigate the search results by using the search button to find a medical facility without API calls
 - User-friendly filtering through various options; rating, alphabetical order, and real real-world application rating that has access to the main rating source
+- Real-time results scenarios with immediate distance calculations
 
 **Performance & Reliability**
-- Intelligent caching (10-minute system reducing API calls by 90%)
-- Progressive loading with pagination (9 facilities per page)
-- Comprehensive error handling and recovery
-- Nginx load balancing for high availability
+- Caching intelligence that reduced system calling APIs by 90%
+- Exploring medical facilities by using pagination (9 medical facilities per page)
+- User-friendly error handling and recovery
+- Nginx load balancing for high availability to reduce traffic distribution between the two web servers.
 
 **Design & Accessibility**
-- Healthcare-focused green and yellow theme
-- Mobile-first responsive design
+- HealthHub Bridge primary colors used green and yellow theme
+- Mobile web-based application responsive design
 - ARIA labels and semantic HTML
-- Real-time feedback with loading states
-- Clean modal interfaces
+- User-friendly feedback with loading states
+- Visually appealing modal interfaces
 
 ## 4. Technologies
 
@@ -160,11 +157,9 @@ This application is to bridge the gap that exists when finding medical facilitie
 - **OpenStreetMap Nominatim**: Free geocoding and fallback facility search
 
 ### Infrastructure
-- Nginx load balancer for traffic distribution
-- Ubuntu web servers (dual-server setup for redundancy)
-- Nginx HTTP server with virtual host configuration
-- UFW firewall for security
-- Single-file architecture for easy deployment
+- Nginx load balancer focuses on traffic distribution between the two servers
+- Web servers for setting up the web-based application
+- UFW firewall for security purposes
 
 ## 5. Deployment Instructions
 
@@ -178,10 +173,12 @@ This application is to bridge the gap that exists when finding medical facilitie
 ### Step 1: Connect to Servers
 1. Create a repository and clone it to the container (webterm)
 2. CD into the repo directory
-3. Create a README.md file and an Index.html
+3. Create the scripts file:
+    - README.md
+    - Index.html
 4. Use SSH to connect to your web servers or hosting service
 
-### Step 2: Prepare Web Directory
+### Step 2: Directory Creation
 **On both Web01 and Web02**
 ```bash
 cd /var/www/
@@ -191,7 +188,7 @@ sudo mkdir -p healthhub
 sudo chown $USER:$USER healthhub
 cd healthhub
 ```
-### Step 3: Upload Application Files
+### Step 3: Upload Application files to the servers
 **On your local machine**
 1. Navigate to the project directory containing Index.html and README.md
 
@@ -200,59 +197,15 @@ cd healthhub
 scp Index.html README.md ubuntu@web01:/var/www/healthhub/
 scp Index.html README.md ubuntu@web02:/var/www/healthhub/
 ```
-### Step 4: Configure Web Servers
+### Step 4: Configuration of web servers
 **On both Web01 and Web02**
 
 Create virtual host configuration:
 ```bash
 sudo nano /etc/nginx/sites-available/healthhub
 ```
-Add the following configuration:
-```nginx
-server {
-    listen 80;
-    listen [::]:80;
-   
-    server_name solomonleek.tech www.solomonleek.tech _;
-   
-    root /var/www/healthhub;
-    index index.html;
-
-    # Logging
-    access_log /var/log/nginx/healthhub_access.log;
-    error_log /var/log/nginx/healthhub_error.log;
-
-    # Main location
-    location / {
-        try_files $uri $uri/ =404;
-    }
-
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-
-    # Gzip compression
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 1024;
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json;
-
-    # Cache static assets
-    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Health check endpoint
-    location /health {
-        access_log off;
-        return 200 "healthy\n";
-        add_header Content-Type text/plain;
-    }
-}
-```
-
+### Then add the configuration scripts into
+- /etc/nginx/sites-available/healthhub
 **Enable the site**:
 ```bash
 # Remove default site
@@ -290,56 +243,8 @@ Configure Nginx load balancer:
 ```bash
 sudo nano /etc/nginx/sites-available/healthhub-lb
 ```
-Add the following configuration:
-```nginx
-upstream healthhub_backend {
-    server 100.26.206.13:80 max_fails=3 fail_timeout=30s;
-    server 54.211.4.59:80 max_fails=3 fail_timeout=30s;
-}
-
-server {
-    listen 80;
-    listen [::]:80;
-   
-    server_name solomonleek.tech www.solomonleek.tech;
-
-    # Logging
-    access_log /var/log/nginx/healthhub_lb_access.log;
-    error_log /var/log/nginx/healthhub_lb_error.log;
-
-    # Proxy settings
-    location / {
-        proxy_pass http://healthhub_backend;
-       
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-       
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-       
-        proxy_buffering on;
-        proxy_buffer_size 4k;
-        proxy_buffers 8 4k;
-       
-        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
-    }
-
-    location /health {
-        access_log off;
-        return 200 "Load balancer healthy\n";
-        add_header Content-Type text/plain;
-    }
-
-    location /lb-status {
-        access_log off;
-        return 200 "Active backends: 2\nServer 1: 100.26.206.13:80\nServer 2: 54.211.4.59:80\n";
-        add_header Content-Type text/plain;
-    }
-}
-```
+Add the configuration scripts for configuring the load balancer into
+- healthhub-lb
 
 **Enable and restart Nginx**:
 ```bash
@@ -384,27 +289,6 @@ curl http://54.236.248.230/
 - **Application**: http://54.236.248.230
 - **Load Test**: `curl -s http://54.236.248.230`
 
-## 6. Security & Performance
-
-### Security Features
-- UFW firewall with restricted port access (22, 80, 443)
-- Input validation and XSS protection
-- No sensitive data exposure
-
-### Performance Optimizations
-- Intelligent caching (10-minute system, 90% API call reduction)
-- Progressive pagination (9 facilities per page)
-- Lazy map loading and event delegation
-- Dual API strategy with graceful fallbacks
-- Single-file architecture with CDN resources
-
-## 7. Testing
-### Basic Tests
-- Search functionality with various locations
-- Filter and sorting operations
-- Favorites persistence across sessions
-- Error handling with invalid inputs
-
 ### Load Balancer Tests
 ```bash
 # Access test
@@ -413,6 +297,23 @@ curl http://54.236.248.230
 # Performance test
 ab -n 1000 -c 10 http://54.236.248.230/
 ```
+
+## 6. Security & Performance
+
+### Security Features
+- UFW firewall exclusively for port access (22, 80, 443)
+- Input validation and XSS protection
+- No sensitive data exposure
+
+## 7. Testing
+### Basic Tests
+- Search functionality for various locations
+- Filter medical facilities based on hospitals, clinics, and optical centers
+- Sort medical facilities based on their distance (Nearest medical facility), A-Z, Z-A, and rating
+- Favorites persistence across sessions
+- Appointment booking with medical facility functionality
+- Error handling with invalid inputs
+
 ## 8. Troubleshooting
 
 ### Common Issues
@@ -446,54 +347,26 @@ if (!data || data.length === 0) {
 ```
 ## 9. API Attribution
 ### APIs Used
-
-**Google Places API (New V2)**
-- **Purpose**: Primary medical facility search with comprehensive data
-- **Provider**: Google via RapidAPI
-- **Features**: Ratings, phone numbers, addresses, opening hours
-- **Documentation**: https://developers.google.com/maps/documentation/places/web-service/overview
-- **Rate Limits**: 500 requests/day (can be increased)
-- **Cost**: Free tier available, paid plans for higher usage
-
-**Google Street View Static API**
-- **Purpose**: Visual facility context through street-level imagery
-- **Provider**: Google via RapidAPI
-- **Features**: 360-degree street views, location verification
-- **Documentation**: https://developers.google.com/maps/documentation/streetview/overview
-- **Rate Limits**: 25,000 requests/day
-
-**OpenStreetMap Nominatim**
-- **Purpose**: Geocoding, reverse geocoding, and fallback facility search
-- **Provider**: OpenStreetMap Foundation
-- **License**: Open Database License (ODbL)
-- **Features**: Free, no API key required, global coverage
-- **Documentation**: https://nominatim.org/release-docs/latest/api/Overview/
-- **Usage Policy**: 1 request per second for fair use
-- **Attribution**: Map data © OpenStreetMap contributors
-
-**Leaflet.js**
-- **Purpose**: Interactive mapping library
-- **License**: BSD 2-Clause License
-- **Features**: Lightweight, mobile-friendly, highly customizable
-- **Documentation**: https://leafletjs.com/
-- **Attribution**: Required in map display
+- Google places API (New v2) from RapidAPI(Rating, Phone numbers, address, and opening hours)
+- Google street view static API from RapidAPI(visual facility context through street-level imagery)
+- OpenStreetMap Nominatim(geocoding, reverse geocoding, and fallback facility search)
+- leaflet.js for an interactive mapping library for map display
 
 **Font Awesome**
-- **Purpose**: Icon library for UI elements
-- **Version**: 6.4.0
-- **License**: Font Awesome Free License
-- **Documentation**: https://fontawesome.com/
+-  Icon library for UI elements
+-  Font Awesome Free License
+-  https://fontawesome.com/
 
 ### Credit & Attribution
-All APIs are properly credited throughout the application:
-- Footer attribution for Google APIs and OpenStreetMap
-- Map tiles include OpenStreetMap copyright
-- API links provided in documentation
-- Compliance with all licensing requirements
+All APIs used in the web-based application are both credited in the application and the documentation file
+- Footer attribution for APIs recognition
+- OpenStreetMap copyright
+- API links are documented in the README.md file
+- Compliance with all licensing requirements.
 
-## 10. Challenges & Solutions
+## 10. Encounter challenges and solutions
 
-### Challenge 1: API Rate Limiting
+### 1: Rate Limiting from API
 **Problem**: Google Places API has strict rate limits that could be exhausted quickly with multiple users.
 
 **Solution**:
@@ -502,7 +375,7 @@ All APIs are properly credited throughout the application:
 - Used OpenStreetMap as a fallback if Google doesn't work
 - Displays cache age to users for transparency
 
-### Challenge 2: Global Coverage
+### 2: Global Coverage
 **Problem**: Initial API selection was limited to specific countries.
 
 **Solution**:
@@ -511,7 +384,7 @@ All APIs are properly credited throughout the application:
 - Tested with five East African cities and continents
 - Implemented reverse geocoding for coordinates to make places turn into names
 
-### Challenge 3: Load Balancer Configuration
+### 3: Load Balancer Configuration
 **Problem**: Health checks were failing intermittently, causing server removal.
 
 **Solution**:
@@ -520,16 +393,16 @@ All APIs are properly credited throughout the application:
 - Added proper health check endpoint
 - Implemented comprehensive logging
 
-### Challenge 4: User Experience on Mobile
-**Initial design not being mobile-friendly; buttons were small, and hard for the text to read
+### 4: User Experience on Mobile
+**Problem**: Initial design not being mobile-friendly; buttons were small, and hard for the text to read.
 
 **Solution**:
-- Mobile-first responsive design
-- Used CSS Grid and Flexbox
+- Implemented a web-based application responsive on various devices
+- Apply CSS styling, Flexbox, and Grid
 - Tested on multiple device sizes
 - Added touch-friendly button sizing (minimum 44px)
 
-### Challenge 5: API Key Security
+### 5: API Key Security
 **Problem**: API keys' security purpose from being exposed in a public repository.
 
 **Solution**:
@@ -538,7 +411,7 @@ All APIs are properly credited throughout the application:
 - Documented security practices
 - Implemented key rotation policy
 
-### Challenge 6: Error Handling
+### 6: Error Handling
 **Problem**: Users are experiencing confusing errors when APIs fail.
 
 **Solution**:
@@ -547,8 +420,8 @@ All APIs are properly credited throughout the application:
 - Automatic fallback to cached data
 - Graceful degradation when services are unavailable
 
-### Challenge 7: Data Presentation
-**The initial data interface was being overwhelmed, making users unable to find accurate information.
+### 7: Data Presentation
+**Problem**: The initial data interface was being overwhelmed, making users unable to find accurate information.
 
 **Solution**:
 - Implemented pagination (9 facilities per page)
@@ -556,7 +429,7 @@ All APIs are properly credited throughout the application:
 - Created card-based layout for clarity
 - Included search-within-results feature
 
-### Challenge 8: Performance Optimization
+### 8: Performance Optimization
 **Problem**: Page loaded slowly due to all assets and API calls.
 
 **Solution**:
